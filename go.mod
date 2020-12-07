@@ -50,7 +50,7 @@ require (
 	github.com/ipfs/go-metrics-interface v0.0.1
 	github.com/ipfs/go-metrics-prometheus v0.0.2
 	github.com/ipfs/go-mfs v0.1.2
-	github.com/ipfs/go-path v0.0.8
+	github.com/ipfs/go-path v0.0.8-0.20201203092655-5e8ad22f98b2
 	github.com/ipfs/go-unixfs v0.2.4
 	github.com/ipfs/go-verifcid v0.0.1
 	github.com/ipfs/interface-go-ipfs-core v0.4.0
