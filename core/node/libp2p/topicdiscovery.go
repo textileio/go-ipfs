@@ -1,31 +1,35 @@
 package libp2p
 
 import (
-	"math/rand"
+	"context"
 	"time"
 
 	"github.com/libp2p/go-libp2p-core/discovery"
 	"github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/peer"
 	disc "github.com/libp2p/go-libp2p-discovery"
 
 	"github.com/ipfs/go-ipfs/core/node/helpers"
 	"go.uber.org/fx"
 )
 
+type AdvertiseOnly struct {
+	base discovery.Discovery
+}
+
+func (a *AdvertiseOnly) Advertise(ctx context.Context, ns string, opts ...discovery.Option) (time.Duration, error) {
+	return a.base.Advertise(ctx, ns, opts...)
+}
+
+func (a *AdvertiseOnly) FindPeers(ctx context.Context, ns string, opts ...discovery.Option) (<-chan peer.AddrInfo, error) {
+	c := make(chan peer.AddrInfo)
+	close(c)
+	return c, nil
+}
+
 func TopicDiscovery() interface{} {
 	return func(mctx helpers.MetricsCtx, lc fx.Lifecycle, host host.Host, cr BaseIpfsRouting) (service discovery.Discovery, err error) {
 		baseDisc := disc.NewRoutingDiscovery(cr)
-		minBackoff, maxBackoff := time.Second*60, time.Hour
-		rng := rand.New(rand.NewSource(rand.Int63()))
-		d, err := disc.NewBackoffDiscovery(
-			baseDisc,
-			disc.NewExponentialBackoff(minBackoff, maxBackoff, disc.FullJitter, time.Second, 5.0, 0, rng),
-		)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return d, nil
+		return &AdvertiseOnly{base: baseDisc}, nil
 	}
 }
